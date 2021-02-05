@@ -6,13 +6,12 @@
         {
             "name": "RetailId",
             "type": {
-                "type": "string",
+                "type": "int",
                 "arg.properties": {
                     "iteration": {
                         "start": 1,
                         "step": 1
-                    },
-                    "prefix": "v1."
+                    }
                 }
             }
         },
