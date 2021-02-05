@@ -1,0 +1,114 @@
+{
+    "namespace": "streams",
+    "name": "impressions",
+    "type": "record",
+    "fields": [
+        {
+            "name": "RetailId",
+            "type": {
+                "type": "string",
+                "arg.properties": {
+                    "iteration": {
+                        "start": 1,
+                        "step": 1
+                    },
+                    "prefix": "v1."
+                }
+            }
+        },
+        {
+            "name": "InvoiceNo",
+            "type": {
+                "type": "int",
+                "arg.properties": {
+                    "iteration": {
+                        "start": 536365,
+                        "step": 1
+                    }
+                }
+            }
+        },
+        {
+            "name": "StockCode",
+            "type": {
+                "type": "string",
+                "arg.properties": {
+                    "regex": "[0-9]{4,6}[A-Z]?"
+                }
+            }
+        },
+        {
+            "name": "Description",
+            "type": {
+                "type": "string",
+                "arg.properties": {
+                    "regex": "[0-9A-Z ]{5,20}"
+                }
+            }
+        },
+        {
+            "name": "Quantity",
+            "type": {
+                "type": "int",
+                "arg.properties": {
+                    "range": {
+                        "min": 1,
+                        "max": 10
+                    }
+                }
+            }
+        },
+        {
+            "name": "InvoiceDate",
+            "type": {
+                "type": "long",
+                "format_as_time": "unix_long",
+                "arg.properties": {
+                    "iteration": {
+                        "start": 1,
+                        "step": 60
+                    }
+                }
+            }
+        },
+        {
+            "name": "UnitPrice",
+            "type": {
+                "type": "double",
+                "arg.properties": {
+                    "range": {
+                        "min": 0.1,
+                        "max": 1000.0
+                    }
+                }
+            }
+        },
+        {
+            "name": "CustomerId",
+            "type": {
+                "type": "int",
+                "arg.properties": {
+                    "options": [
+                        17850,
+                        13047,
+                        12583,
+                        13748
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Country",
+            "type": {
+                "type": "string",
+                "arg.properties": {
+                    "options": [
+                        "United Kingdom",
+                        "France",
+                        "Australia"
+                    ]
+                }
+            }
+        }        
+    ]
+}
