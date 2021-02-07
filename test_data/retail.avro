@@ -1,6 +1,6 @@
 {
     "namespace": "streams",
-    "name": "impressions",
+    "name": "retail",
     "type": "record",
     "fields": [
         {
@@ -18,12 +18,13 @@
         {
             "name": "InvoiceNo",
             "type": {
-                "type": "int",
+                "type": "string",
                 "arg.properties": {
-                    "iteration": {
-                        "start": 536365,
-                        "step": 1
-                    }
+                    "range": {
+                        "min": 536365,
+                        "max": 581587
+                    },
+                    "regex":"C?[0-9]{6}"
                 }
             }
         },
@@ -61,11 +62,10 @@
             "name": "InvoiceDate",
             "type": {
                 "type": "long",
-                "format_as_time": "unix_long",
                 "arg.properties": {
-                    "iteration": {
-                        "start": 1,
-                        "step": 60
+                    "range": {
+                        "min": 1291191960000,
+                        "max": 1299675000000
                     }
                 }
             }
@@ -77,22 +77,20 @@
                 "arg.properties": {
                     "range": {
                         "min": 0.1,
-                        "max": 1000.0
+                        "max": 100.0
                     }
                 }
             }
         },
         {
-            "name": "CustomerId",
+            "name": "CustomerID",
             "type": {
                 "type": "int",
                 "arg.properties": {
-                    "options": [
-                        17850,
-                        13047,
-                        12583,
-                        13748
-                    ]
+                    "range": {
+                        "min": 12346,
+                        "max": 12400
+                    }
                 }
             }
         },
@@ -104,10 +102,45 @@
                     "options": [
                         "United Kingdom",
                         "France",
-                        "Australia"
+                        "Australia",
+                        "Netherlands",
+                        "Germany",
+                        "Norway",
+                        "EIRE",
+                        "Switzerland",
+                        "Spain",
+                        "Poland",
+                        "Portugal",
+                        "Italy",
+                        "Belgium",
+                        "Lithuania",
+                        "Japan",
+                        "Iceland",
+                        "Channel Islands",
+                        "Denmark",
+                        "Cyprus",
+                        "Sweden",
+                        "Austria",
+                        "Israel",
+                        "Finland",
+                        "Bahrain",
+                        "Greece",
+                        "Hong Kong",
+                        "Singapore",
+                        "Lebanon",
+                        "United Arab Emirates",
+                        "Saudi Arabia",
+                        "Czech Republic",
+                        "Canada",
+                        "Unspecified",
+                        "Brazil",
+                        "USA",
+                        "European Community",
+                        "Malta",
+                        "RSA"
                     ]
                 }
             }
-        }        
+        }
     ]
 }

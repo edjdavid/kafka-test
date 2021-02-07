@@ -1,0 +1,12 @@
+name: dash
+channels:
+  - conda-forge
+dependencies:
+  - ipykernel
+  - dask
+  - openpyxl
+  - kafka-python
+  - chart-studio
+  - dash
+  - nomkl
+  - s3fs

@@ -166,6 +166,7 @@ services:
           fi
           sleep 5 
         done
+        sleep 1
         echo -e "\n--\n+> Creating S3 Sink source"
         curl -s -X PUT -H  "Content-Type:application/json" http://localhost:8083/connectors/test_connector/config \
             -d '{
@@ -182,7 +183,12 @@ services:
             "partitioner.class": "io.confluent.connect.storage.partitioner.DefaultPartitioner",
             "key.converter": "org.apache.kafka.connect.storage.StringConverter",
             "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-            "value.converter.schemas.enable": "false"
+            "value.converter.schemas.enable": "false",
+            "transforms": "TimestampConverter",
+            "transforms.TimestampConverter.field": "InvoiceDate",
+            "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+            "transforms.TimestampConverter.format": "yyyy-MM-dd HH:mm:ss",
+            "transforms.TimestampConverter.target.type": "string"
         }'
         sleep infinity
 
@@ -199,7 +205,6 @@ services:
       MINIO_SECRET_KEY: i_am_a_secret
     command: server /export
 
-  # Create a bucket for the kafka data to go in  
   createbuckets:
     image: minio/mc
     container_name: createbuckets
@@ -213,3 +218,14 @@ services:
             done;
         /usr/bin/mc mb minio/retail-bucket;
       "
+
+  dashboard:
+    build: ./dashboard
+    container_name: dashboard
+    depends_on:
+      - minio
+    ports:
+      - "8900:8080"
+    volumes:
+      - ./dashboard:/srv
+    entrypoint: /bin/bash -c "/opt/conda/envs/dash/bin/python /srv/dashboard.py"
