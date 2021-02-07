@@ -9,6 +9,10 @@ Dashboard
   - Read json data directly from MinIO using Dask
   - Create dashboard using Plotly Dash ([dashboard.py]('dashboard/dashboard.py'))
 
+Updating the schema
+  - Update [retail_schema.json](dashboard/retail_schema.json) to include the fields and data types that would be read by the dashboard app
+  - `json_engine` in [dashboard.py]('dashboard/dashboard.py') should handle adding and removing extra keys from the stored data and the schema
+
 
 ## Installation
 
