@@ -95,7 +95,7 @@ services:
                        echo Waiting a few seconds for topic creation to finish... && \
                        sleep 11 && \
                        echo Creating sample data... && \
-                       ksql-datagen schema=/data/retail.avro iterations=200 format=json \
+                       ksql-datagen schema=/data/retail.avro iterations=1000 format=json \
                          topic=retail key=RetailId bootstrap-server=broker:9092 && \
                        tail -f /dev/null'"
     environment:
@@ -174,7 +174,7 @@ services:
             "tasks.max": "1",
             "topics": "retail",
             "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
-            "flush.size": "100",
+            "flush.size": "500",
             "schema.compatibility": "NONE",
             "s3.bucket.name": "retail-bucket",
             "s3.region": "us-east-1",

@@ -33,7 +33,7 @@
             "type": {
                 "type": "string",
                 "arg.properties": {
-                    "regex": "[0-9]{4,6}[A-Z]?"
+                    "regex": "[0-9]{3}[A-Z]?"
                 }
             }
         },
