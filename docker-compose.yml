@@ -62,22 +62,13 @@ services:
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_CONNECT_URL: "http://connect:8083"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
-
-  ksqldb-cli:
-    image: confluentinc/cp-ksqldb-cli:6.0.1
-    container_name: ksqldb-cli
-    depends_on:
-      - broker
-      - connect
-      - ksqldb-server
-    entrypoint: /bin/sh
-    tty: true
 
   ksql-datagen:
     image: confluentinc/ksqldb-examples:6.0.1
@@ -95,8 +86,9 @@ services:
                        echo Waiting a few seconds for topic creation to finish... && \
                        sleep 11 && \
                        echo Creating sample data... && \
-                       ksql-datagen schema=/data/retail.avro iterations=1000 format=json \
-                         topic=retail key=RetailId bootstrap-server=broker:9092 && \
+                       ksql-datagen schema=/data/retail.avro iterations=100 format=avro \
+                         topic=retail key=RetailId bootstrap-server=broker:9092 \
+                         schemaRegistryUrl=http://schema-registry:8081 && \
                        tail -f /dev/null'"
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
@@ -105,21 +97,6 @@ services:
       STREAMS_SCHEMA_REGISTRY_PORT: 8081
     volumes:
       - ./test_data:/data
-
-  rest-proxy:
-    image: confluentinc/cp-kafka-rest:6.0.1
-    depends_on:
-      - broker
-      - schema-registry
-    ports:
-      - 8082:8082
-    hostname: rest-proxy
-    container_name: rest-proxy
-    environment:
-      KAFKA_REST_HOST_NAME: rest-proxy
-      KAFKA_REST_BOOTSTRAP_SERVERS: 'broker:29092'
-      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
-      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
 
   connect:
     build: ./connect
@@ -166,30 +143,30 @@ services:
           fi
           sleep 5 
         done
-        sleep 1
+        sleep 5
         echo -e "\n--\n+> Creating S3 Sink source"
         curl -s -X PUT -H  "Content-Type:application/json" http://localhost:8083/connectors/test_connector/config \
             -d '{
-            "connector.class": "io.confluent.connect.s3.S3SinkConnector",
-            "tasks.max": "1",
-            "topics": "retail",
-            "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
-            "flush.size": "500",
-            "schema.compatibility": "NONE",
-            "s3.bucket.name": "retail-bucket",
-            "s3.region": "us-east-1",
-            "storage.class": "io.confluent.connect.s3.storage.S3Storage",
-            "store.url": "http://minio:9000/",
-            "partitioner.class": "io.confluent.connect.storage.partitioner.DefaultPartitioner",
-            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-            "value.converter.schemas.enable": "false",
-            "transforms": "TimestampConverter",
-            "transforms.TimestampConverter.field": "InvoiceDate",
-            "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
-            "transforms.TimestampConverter.format": "yyyy-MM-dd HH:mm:ss",
-            "transforms.TimestampConverter.target.type": "string"
+                "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+                "tasks.max": "1",
+                "topics": "retail",
+                "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+                "flush.size": "50",
+                "schema.compatibility": "FORWARD",
+                "s3.bucket.name": "retail-bucket",
+                "s3.region": "us-east-1",
+                "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+                "store.url": "http://minio:9000/",
+                "partitioner.class": "io.confluent.connect.storage.partitioner.DefaultPartitioner",
+                "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+                "value.converter": "io.confluent.connect.avro.AvroConverter",
+                "value.converter.schema.registry.url": "http://schema-registry:8081",
+                "transforms.TimestampConverter.field": "InvoiceDate",
+                "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+                "transforms.TimestampConverter.format": "yyyy-MM-dd HH:mm:ss",
+                "transforms.TimestampConverter.target.type": "string"
         }'
+        echo -e "S3 Sink Created"
         sleep infinity
 
   minio:
@@ -219,13 +196,13 @@ services:
         /usr/bin/mc mb minio/retail-bucket;
       "
 
-  dashboard:
-    build: ./dashboard
-    container_name: dashboard
-    depends_on:
-      - minio
-    ports:
-      - "8900:8080"
-    volumes:
-      - ./dashboard:/srv
-    entrypoint: /bin/bash -c "/opt/conda/envs/dash/bin/python /srv/dashboard.py"
+  # dashboard:
+  #   build: ./dashboard
+  #   container_name: dashboard
+  #   depends_on:
+  #     - minio
+  #   ports:
+  #     - "8900:8080"
+  #   volumes:
+  #     - ./dashboard:/srv
+  #   entrypoint: /bin/bash -c "/opt/conda/envs/dash/bin/python /srv/dashboard.py"

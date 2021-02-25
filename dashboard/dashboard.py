@@ -6,10 +6,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 import plotly.graph_objs as go
-import plotly.express as px
 
 from plotly.subplots import make_subplots
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 df_schema = pd.read_json("/srv/retail_schema.json", lines=True)
 
