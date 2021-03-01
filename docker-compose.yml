@@ -196,15 +196,15 @@ services:
         /usr/bin/mc mb minio/retail-bucket;
       "
 
-  # trino:
-  #   image: trinodb/trino
-  #   hostname: trino-host
-  #   ports:
-  #     - 8080:8080
-  #   volumes: 
-  #     - ./trino/etc:/etc/trino
-  #   depends_on:
-  #     - minio
+  trino:
+    image: trinodb/trino
+    hostname: trino-host
+    ports:
+      - 8080:8080
+    volumes: 
+      - ./trino/etc:/etc/trino
+    depends_on:
+      - minio
 
   # dashboard:
   #   build: ./dashboard
