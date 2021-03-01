@@ -143,9 +143,9 @@ services:
           fi
           sleep 5 
         done
-        sleep 5
+        sleep 10
         echo -e "\n--\n+> Creating S3 Sink source"
-        curl -s -X PUT -H  "Content-Type:application/json" http://localhost:8083/connectors/test_connector/config \
+        curl -s -X PUT -H  "Content-Type:application/json" http://localhost:8083/connectors/retail_connector/config \
             -d '{
                 "connector.class": "io.confluent.connect.s3.S3SinkConnector",
                 "tasks.max": "1",
@@ -161,10 +161,10 @@ services:
                 "key.converter": "org.apache.kafka.connect.storage.StringConverter",
                 "value.converter": "io.confluent.connect.avro.AvroConverter",
                 "value.converter.schema.registry.url": "http://schema-registry:8081",
+                "transforms": "TimestampConverter",
                 "transforms.TimestampConverter.field": "InvoiceDate",
                 "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
-                "transforms.TimestampConverter.format": "yyyy-MM-dd HH:mm:ss",
-                "transforms.TimestampConverter.target.type": "string"
+                "transforms.TimestampConverter.target.type": "Timestamp"
         }'
         echo -e "S3 Sink Created"
         sleep infinity
@@ -195,6 +195,16 @@ services:
             done;
         /usr/bin/mc mb minio/retail-bucket;
       "
+
+  # trino:
+  #   image: trinodb/trino
+  #   hostname: trino-host
+  #   ports:
+  #     - 8080:8080
+  #   volumes: 
+  #     - ./trino/etc:/etc/trino
+  #   depends_on:
+  #     - minio
 
   # dashboard:
   #   build: ./dashboard
