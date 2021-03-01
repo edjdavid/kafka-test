@@ -143,7 +143,7 @@ services:
           fi
           sleep 5 
         done
-        sleep 10
+        sleep 1
         echo -e "\n--\n+> Creating S3 Sink source"
         curl -s -X PUT -H  "Content-Type:application/json" http://localhost:8083/connectors/retail_connector/config \
             -d '{
@@ -163,11 +163,12 @@ services:
                 "value.converter.schema.registry.url": "http://schema-registry:8081",
                 "transforms": "TimestampConverter",
                 "transforms.TimestampConverter.field": "InvoiceDate",
-                "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+                "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$$Value",
                 "transforms.TimestampConverter.target.type": "Timestamp"
         }'
         echo -e "S3 Sink Created"
         sleep infinity
+
 
   minio:
     image: minio/minio
@@ -205,6 +206,39 @@ services:
       - ./trino/etc:/etc/trino
     depends_on:
       - minio
+    command:
+      - bash
+      - -c
+      - |
+        /usr/lib/trino/bin/run-trino &
+        sleep 1
+        while : ; do
+          /bin/trino --execute="
+          CREATE SCHEMA IF NOT EXISTS hive.retail;
+
+          USE hive.retail;
+
+          CREATE TABLE IF NOT EXISTS retail (
+              RetailId INT,
+              InvoiceNo VARCHAR,
+              StockCode VARCHAR,
+              Description VARCHAR,
+              Quantity INT,
+              InvoiceDate TIMESTAMP(3),
+              UnitPrice DOUBLE,
+              CustomerId INT,
+              Country VARCHAR
+          )
+          WITH (
+              external_location = 's3a://retail-bucket/topics/retail/partition=0/',
+              format='PARQUET'
+          );
+          " && break
+          sleep 5
+        done
+        echo "Done creating table"
+        sleep infinity
+
 
   # dashboard:
   #   build: ./dashboard
