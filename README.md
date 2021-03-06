@@ -2,16 +2,14 @@
 
 Test infrastructure for kafka
   - generate random data from `ksql-datagen` using the schema from [retail.avro](test_data/retail.avro)
-  - extract data from kafka using kafka-connect s3 connector, using MinIO as s3 replacement
-  - use kafka-connect transform to reformat data and to dump the messages as json on minio
+  - extract avro data from kafka using kafka-connect s3 connector, using MinIO as s3 replacement
+  - use kafka-connect transform to reformat data and dump the messages as parquet on minio
 
-Dashboard
-  - Read json data directly from MinIO using Dask
-  - Create dashboard using Plotly Dash ([dashboard.py]('dashboard/dashboard.py'))
+SQL / Trino
+  - Use parquet data in S3 as SQL data source (Table: `hive.retail.retail`)
 
 Updating the schema
-  - Update [retail_schema.json](dashboard/retail_schema.json) to include the fields and data types that would be read by the dashboard app
-  - `json_engine` in [dashboard.py]('dashboard/dashboard.py') should handle adding and removing extra keys from the stored data and the schema
+  - Update the Trino table schema
 
 
 ## Installation
@@ -19,10 +17,10 @@ Updating the schema
 ```
 docker-compose up -d
 ```
-If everything goes well, ksql-datagen will send 200 random messages which will be converted to json and stored to `retail-bucket` in MinIO
+If everything goes well, ksql-datagen will send 100 random messages which will be converted to parquet and stored to `retail-bucket` in MinIO
 
 ### Ports
- - 8900: Dashboard
+ - 8080: Trino
  - 9000: MinIO Browser
 
  ## Usage
